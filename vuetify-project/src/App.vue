@@ -1,87 +1,64 @@
 <template>
-  <v-row>
+  <v-row no-gutters>
     <v-col cols="3"></v-col>
     <v-col cols="6">
+      <div class="suggestion position-absolute ma-4">{{ suggestion.slice(search.length - searchTerm.length) }}</div>
       <v-text-field
-        clearable
-        label="Enter your query"
+        label="Type here..."
         v-model="search"
         @input="onChange"
-        prepend-icon="$vuetify"
-        @keydown.up.prevent="onUp"
-        @keydown.down.prevent="onDown"
-        @keydown.enter.prevent="onEnter"
-      >
-      </v-text-field>
-      <v-list v-if="filteredStrings.length">
-        <v-list-item
-          v-for="(str, index) in filteredStrings"
-          :key="index"
-          @click="selectString(str)"
-          :class="{'highlight': index === focusIndex}"
-        >
-          <v-list-item-title>{{ str }}</v-list-item-title>
-        </v-list-item>
-      </v-list>
+        @keydown.tab.prevent="onTab"
+        class="position-relative ma-8"
+      ></v-text-field>
     </v-col>
     <v-col cols="3"></v-col>
   </v-row>
 </template>
 
-
 <script>
   export default {
     data() {
       return {
-        strings: ['@John', '@Jane', '@Doe', '@Smith'],
+        strings: ['','John', 'Jane', 'Doe', 'Smith'],
         search: '',
-        focusIndex: -1
+        suggestion: '',
+        searchTerm: ''
       };
     },
     computed: {
       filteredStrings() {
-        if (!this.search.includes('@')) {
+        if (!this.search) {
           return [];
         }
-        let searchTerm = this.search.split('@').pop();
-        return this.strings.filter(str => str.toLowerCase().includes(searchTerm.toLowerCase()));
+        let words = this.search.split(' ');
+        this.searchTerm = words[words.length - 1];
+        return this.strings.filter(str => str.toLowerCase().startsWith(this.searchTerm.toLowerCase()));
       }
     },
     methods: {
-      selectString(str) {
-        let parts = this.search.split('@');
-        parts.pop();
-        parts.push(str);
-        this.search = parts.join('@');
-      },
       onChange() {
-        // logic to handle '@' detection
-        if (this.search.includes('@')) {
-          // logic to handle autocompletion
+        let words = this.search.split(' ');
+
+        if (this.filteredStrings.length > 0) {
+          words[words.length - 1] = this.filteredStrings[0];
+          this.suggestion = words.join(' ');
+        } else {
+          this.suggestion = '';
         }
       },
-      onUp() {
-        if (this.focusIndex > 0) {
-          this.focusIndex--;
-        }
-      },
-      onDown() {
-        if (this.focusIndex < this.filteredStrings.length - 1) {
-          this.focusIndex++;
-        }
-      },
-      onEnter() {
-        if (this.focusIndex >= 0 && this.focusIndex < this.filteredStrings.length) {
-          this.selectString(this.filteredStrings[this.focusIndex]);
-        }
+      onTab() {
+        this.search = this.suggestion;
+        this.suggestion = '';
       },
     }
   }
 </script>
 
 <style scoped>
-.highlight {
-  background-color: #f0f0f0;  /* Light gray background */
-  color: #000000;  /* Black text */
-}
+  .suggestion {
+    color: lightgreen;
+    line-height: 0px; /* Adjust this to match the height of your text field */
+    left: 27%; /* Adjust this to match the left padding of your text field */
+    pointer-events: none; /* This prevents the suggestion div from blocking interactions with the text field */
+  }
 </style>
