@@ -15,8 +15,11 @@
   </v-row>
 </template>
 
-<script>
+<script> 
+  import { Streamlit } from 'streamlit-component-lib'
+
   export default {
+    name: 'vue_component',
     data() {
       return {
         strings: ['','John', 'Jane', 'Doe', 'Smith'],
@@ -24,6 +27,9 @@
         suggestion: '',
         searchTerm: ''
       };
+    },
+    mounted() {
+      Streamlit.setComponentReady()
     },
     computed: {
       filteredStrings() {
@@ -49,7 +55,7 @@
       onTab() {
         this.search = this.suggestion;
         this.suggestion = '';
-      },
+      }
     }
   }
 </script>
